@@ -1,6 +1,6 @@
 import type { Region, ScrambleResult } from './types';
 
-const BASE = 'http://localhost:8000';
+const BASE = import.meta.env.VITE_API_BASE ?? '';
 
 async function post<T>(path: string, body: unknown, fast = false): Promise<T> {
   const url = `${BASE}${path}${fast ? '?fast=True' : ''}`;
