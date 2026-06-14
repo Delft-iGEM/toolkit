@@ -1,20 +1,5 @@
 import type { Region, ScrambleResult } from './types';
-
-const BASE = import.meta.env.VITE_API_BASE ?? '';
-
-async function post<T>(path: string, body: unknown, fast = false): Promise<T> {
-  const url = `${BASE}${path}${fast ? '?fast=True' : ''}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail ?? 'Request failed');
-  }
-  return res.json();
-}
+import { wasmScrambleConstruct, wasmSwapPart } from './wasm-api';
 
 export function scrambleConstruct(
   sequence: string,
@@ -22,7 +7,8 @@ export function scrambleConstruct(
   fast = false,
   config?: Record<string, unknown>
 ): Promise<ScrambleResult> {
-  return post('/api/scramble', { sequence, regions, config }, fast);
+  const req = JSON.stringify({ sequence, regions, config, fast });
+  return Promise.resolve(JSON.parse(wasmScrambleConstruct(req)) as ScrambleResult);
 }
 
 export function swapPart(
@@ -32,10 +18,12 @@ export function swapPart(
   regionDnas: Record<string, string>,
   fast = false,
 ): Promise<{ dna: string; swapped_dna: string }> {
-  return post('/api/swap-part', {
+  const req = JSON.stringify({
     new_aa: newAa,
     part_name: partName,
     regions,
     region_dnas: regionDnas,
-  }, fast);
+    fast,
+  });
+  return Promise.resolve(JSON.parse(wasmSwapPart(req)) as { dna: string; swapped_dna: string });
 }

@@ -6,6 +6,8 @@ import ResultsView from './components/ResultsView';
 import PartSwapper from './components/PartSwapper';
 import type { Region, ScrambleResult, WorkSession } from './types';
 
+const FAST_MODE_ENABLED = false
+
 export default function App() {
   const [active, setActive] = useState(0);
   const [sequence, setSequence] = useState('');
@@ -56,13 +58,15 @@ export default function App() {
             </div>
           )}
           {active === 3 && <div />}
-          <Switch
-            label="Fast mode"
-            checked={fastMode}
-            onChange={e => setFastMode(e.currentTarget.checked)}
-            size="sm"
-            mt={4}
-          />
+          {
+            FAST_MODE_ENABLED && <Switch
+              label="Fast mode"
+              checked={fastMode}
+              onChange={e => setFastMode(e.currentTarget.checked)}
+              size="sm"
+              mt={4}
+            />
+          }
         </Group>
         {active !== 3 && <>
           <Text mb="xl" />

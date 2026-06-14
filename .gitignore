@@ -10,4 +10,9 @@ wheels/
 .venv
 node_modules
 
+# Rust/WASM build artifacts
+wasm/target/
+frontend/src/wasm-pkg/
+
 .claude
+target
