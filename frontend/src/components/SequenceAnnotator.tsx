@@ -86,9 +86,9 @@ export default function SequenceAnnotator({ sequence, regions: initRegions, onBa
       setPending({ start: lo, end: hi });
       const sliceAa = sequence.slice(lo, hi + 1).toUpperCase();
       const suggestedName =
-        regionType === 'part'
-          ? (elpRepeatName(sliceAa) ?? `P${regions.filter(r => r.type === 'part').length + 1}`)
-          : `L${regions.filter(r => r.type === 'linker').length + 1}`;
+        elpRepeatName(sliceAa) || (regionType === 'part'
+          ? (`P${regions.filter(r => r.type === 'part').length + 1}`)
+          : `L${regions.filter(r => r.type === 'linker').length + 1}`);
       setRegionName(suggestedName);
       setModalOpen(true);
       setSelAnchor(null);

@@ -732,7 +732,7 @@ export default function PartSwapper({ sequence, regions, result, onResultChange,
             </Box>
             <Box style={{ borderTop: '1px solid #dee2e6' }} pt="xs">
               <Group justify="space-between" mb={6}>
-                <Text size="sm" fw={500}>UTR length</Text>
+                <Text size="sm" fw={500}>Non-coding frame length</Text>
                 <Text size="sm" c="dimmed">{utrLength} bp</Text>
               </Group>
               <Slider min={0} max={200} step={10} value={utrLength} onChange={setUtrLength} />
