@@ -3,6 +3,8 @@ export interface Region {
   type: 'part' | 'linker';
   start: number; // 0-indexed inclusive
   end: number;   // 0-indexed inclusive
+  // Set by auto-annotate: these parts are NOT saved to the part library.
+  excludeFromLibrary?: boolean;
 }
 
 export interface RegionResult extends Region {

@@ -5,6 +5,7 @@ import SequenceAnnotator from './components/SequenceAnnotator';
 import ResultsView from './components/ResultsView';
 import PartSwapper from './components/PartSwapper';
 import type { Region, ScrambleResult, WorkSession } from './types';
+import { readRepeatMotif, writeRepeatMotif } from './repeat';
 
 const FAST_MODE_ENABLED = false
 
@@ -15,6 +16,13 @@ export default function App() {
   const [result, setResult] = useState<ScrambleResult | null>(null);
   const [loadedSession, setLoadedSession] = useState<WorkSession | null>(null);
   const [fastMode, setFastMode] = useState(false);
+  const [repeatMotif, setRepeatMotif] = useState<string>(() => readRepeatMotif());
+
+  const handleRepeatMotifChange = (motif: string) => {
+    const m = motif.toUpperCase();
+    setRepeatMotif(m);
+    writeRepeatMotif(m);
+  };
 
   const handleSequenceNext = (seq: string) => {
     setSequence(seq);
@@ -79,7 +87,14 @@ export default function App() {
         </>}
 
         {active === 0 && (
-          <SequenceInput sequence={sequence} onNext={handleSequenceNext} onAssemble={handleAssembleNext} onLoadSession={handleLoadSession} />
+          <SequenceInput
+            sequence={sequence}
+            onNext={handleSequenceNext}
+            onAssemble={handleAssembleNext}
+            onLoadSession={handleLoadSession}
+            repeatMotif={repeatMotif}
+            onRepeatMotifChange={handleRepeatMotifChange}
+          />
         )}
         {active === 1 && (
           <SequenceAnnotator
@@ -87,6 +102,7 @@ export default function App() {
             regions={regions}
             onBack={() => setActive(0)}
             onNext={handleAnnotateNext}
+            repeatMotif={repeatMotif}
           />
         )}
         {active === 2 && (

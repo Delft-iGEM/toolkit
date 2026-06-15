@@ -241,8 +241,12 @@ export default function PartSwapper({ sequence, regions, result, onResultChange,
 
   useEffect(() => {
     if (!baseResult) return;
+    // Parts annotated via auto-annotate are flagged to stay out of the library.
+    const excluded = new Set(
+      regions.filter(r => r.excludeFromLibrary).map(r => r.name)
+    );
     for (const r of baseResult.regions) {
-      if (r.type === 'part') addToLibrary(r.name, r.aa);
+      if (r.type === 'part' && !excluded.has(r.name)) addToLibrary(r.name, r.aa);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

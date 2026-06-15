@@ -7,5 +7,5 @@ export default defineConfig({
   plugins: [react(), wasm(), topLevelAwait()],
   // Use './' for GitHub Pages (subdirectory hosting), '/' for Vercel root.
   base: process.env.VITE_BASE ?? '/',
-  server: { port: 5173 },
+  server: { port: Number(process.env.PORT) || 5173 },
 });

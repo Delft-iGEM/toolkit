@@ -15,8 +15,9 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { IconPlus, IconTrash, IconUpload } from '@tabler/icons-react';
+import { IconPlus, IconSettings, IconTrash, IconUpload } from '@tabler/icons-react';
 import type { Region, WorkSession } from '../types';
+import { DEFAULT_MOTIF, validateMotif } from '../repeat';
 
 const VALID_AA = new Set('ACDEFGHIKLMNPQRSTVWY*');
 
@@ -37,13 +38,30 @@ interface Props {
   onNext: (sequence: string) => void;
   onAssemble?: (sequence: string, regions: Region[]) => void;
   onLoadSession?: (session: WorkSession) => void;
+  repeatMotif: string;
+  onRepeatMotifChange: (motif: string) => void;
 }
 
 let _pid = 0;
 const nextId = () => ++_pid;
 
-export default function SequenceInput({ sequence, onNext, onAssemble, onLoadSession }: Props) {
+export default function SequenceInput({ sequence, onNext, onAssemble, onLoadSession, repeatMotif, onRepeatMotifChange }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  // ── Repeat-motif settings ─────────────────────────────────────────────────
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [motifDraft, setMotifDraft] = useState(repeatMotif);
+  const motifError = validateMotif(motifDraft);
+
+  const openSettings = () => {
+    setMotifDraft(repeatMotif);
+    setSettingsOpen(true);
+  };
+  const saveSettings = () => {
+    if (motifError) return;
+    onRepeatMotifChange(motifDraft.trim().toUpperCase());
+    setSettingsOpen(false);
+  };
+
   // ── Sequence mode ────────────────────────────────────────────────────────
   const [value, setValue] = useState(sequence);
   const [seqError, setSeqError] = useState<string | null>(null);
@@ -140,9 +158,56 @@ export default function SequenceInput({ sequence, onNext, onAssemble, onLoadSess
   const hasAdjacentParts = pieces.some((p, i) => p.type === 'part' && i > 0 && pieces[i - 1].type === 'part');
   const canAssemble = pieces.length > 0 && assembledSeq.length >= 4 && !hasAdjacentParts;
 
+  const settingsModal = (
+    <Modal
+      opened={settingsOpen}
+      onClose={() => setSettingsOpen(false)}
+      title="Repeat settings"
+      size="sm"
+    >
+      <Stack>
+        <TextInput
+          label="Repeat motif"
+          description="Use X for the variable residue (wildcard). The unit length follows the motif length. Default: VPGXG."
+          value={motifDraft}
+          onChange={e => setMotifDraft(e.target.value.toUpperCase().replace(/\s/g, ''))}
+          onKeyDown={e => e.key === 'Enter' && saveSettings()}
+          error={motifError}
+          placeholder={DEFAULT_MOTIF}
+          styles={{ input: { fontFamily: 'monospace', letterSpacing: 1 } }}
+          autoFocus
+        />
+        <Group justify="space-between">
+          <Button variant="subtle" color="gray" onClick={() => setMotifDraft(DEFAULT_MOTIF)}>
+            Reset to default
+          </Button>
+          <Button onClick={saveSettings} disabled={!!motifError}>
+            Save
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+
+  const settingsBar = (
+    <Group justify="flex-end" mb={-8}>
+      <ActionIcon
+        variant="subtle"
+        color="gray"
+        onClick={openSettings}
+        aria-label="Repeat settings"
+        title={`Repeat motif: ${repeatMotif}`}
+      >
+        <IconSettings size={18} />
+      </ActionIcon>
+    </Group>
+  );
+
   if (mode === 'parts') {
     return (
       <Stack mt="md">
+        {settingsBar}
+        {settingsModal}
         {/* Pieces list */}
         {pieces.length === 0 ? (
           <Text size="sm" c="dimmed">No pieces yet — add a part or linker below.</Text>
@@ -274,6 +339,8 @@ export default function SequenceInput({ sequence, onNext, onAssemble, onLoadSess
   // ── Sequence mode (default) ───────────────────────────────────────────────
   return (
     <Stack mt="md">
+      {settingsBar}
+      {settingsModal}
       <Textarea
         label="Amino acid sequence"
         description="Single-letter codes — standard 20 AAs plus stop codon (*)"
